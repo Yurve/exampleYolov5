@@ -220,8 +220,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         //추론된 매트릭스 객체 뽑아내기
 
-        //이름 찾기 + 이후에는 매트릭스 객체를 넣어서 확인해봐야할듯
-        detectName();
+        //이름 찾기 + 이후에는 매트릭스 객체를 넣어서 확인 과정 추가
+        ArrayList<String > nameList = detectName();
+
 
         // displaying the photo and putting the text on it
         //rect 객체를 받아오면 x랑 y를 rect 의 o.5정도 위로 하면될듯.
@@ -232,8 +233,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
        return matInput;
     }
 
-    public void detectName(){
-        ArrayList<String> imgLabels;
+    public ArrayList<String> detectName(){
+        ArrayList<String> imgLabels = null;
         String cocoPath = getFilesDir().getAbsolutePath() + "/coco.names";
         try{
             Stream <String> lines = Files.lines(Paths.get(cocoPath));
@@ -241,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }catch (IOException e){
             e.printStackTrace();
         }
-
+        return imgLabels;
     }
 
 
