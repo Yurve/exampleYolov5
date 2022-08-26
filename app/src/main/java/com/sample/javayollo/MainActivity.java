@@ -18,6 +18,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
@@ -26,12 +27,17 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
 
@@ -196,6 +202,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
     public void readOnnx(){
         copyFile("yolov5s.onnx");
+        copyFile("coco.names");
 
         String onnxFilePath = getFilesDir().getAbsolutePath()+ "/yolov5s.onnx";
 
@@ -204,16 +211,37 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public Mat detect(Mat matInput) {
+
+
         dnnNet.setInput(matInput);
 
-        Mat dnnImage = dnnNet.forward();
+        // provide inference
+      //  Mat classification = dnnNet.forward();
 
-        dnnImage = Dnn.blobFromImage(dnnImage,1.0,new Size(1080,1920));
-        dnnNet.setInput(dnnImage);
-      //  return Dnn.blobFromImage(dnnImage,1.0,new Size(1080,1920));
+        //추론된 매트릭스 객체 뽑아내기
 
+        //이름 찾기 + 이후에는 매트릭스 객체를 넣어서 확인해봐야할듯
+        detectName();
 
-       return dnnImage;
+        // displaying the photo and putting the text on it
+        //rect 객체를 받아오면 x랑 y를 rect 의 o.5정도 위로 하면될듯.
+        Point pos = new Point(50,50);
+        Scalar color = new Scalar(0,0,0);
+        Imgproc.putText(matInput,"monkey people",pos,Imgproc.FONT_HERSHEY_SIMPLEX,1.0,color,2);
+
+       return matInput;
+    }
+
+    public void detectName(){
+        ArrayList<String> imgLabels;
+        String cocoPath = getFilesDir().getAbsolutePath() + "/coco.names";
+        try{
+            Stream <String> lines = Files.lines(Paths.get(cocoPath));
+            imgLabels = lines.collect(Collectors.toCollection(ArrayList::new));
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
     }
 
 
